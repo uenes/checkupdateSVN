@@ -4,6 +4,7 @@ import time
 from subprocess import Popen, PIPE
 
 
+
 while True:
 	# C:\\inetpub\\wwwroot\\Integracao_SIF_SEI_Sprint5
 	process = Popen(['svn', 'status', '-u', sys.argv[1]], stdout=PIPE, stderr=PIPE)
@@ -33,13 +34,13 @@ while True:
 		stringOfPathServerChanges = stringOfPathServerChanges + path[previousLastOne:len(path)] + '\n'
 		 
 		
-	listOfPathLocalChanges = []	
-	for item in listOfPathLocalChanges:
-		indexOfPath = item.find('C:')
-		path = item[indexOfPath:len(item)]		
+	#listOfPathLocalChanges = []	
+	#for item in listOfPathLocalChanges:
+	#	indexOfPath = item.find('C:')
+	#	path = item[indexOfPath:len(item)]		
 
 
-	if len(listOfServerChanges) == 0:
+	if len(listOfServerChanges) > 0:
 		result = ctypes.windll.user32.MessageBoxW(0, u'Novos commits realizados no branch \n \n' + stringOfPathServerChanges, u'ALERTA', 1)
 		#if result == 1:
 		#	process = Popen(['svn', 'update', sys.argv[1]], stdout=PIPE, stderr=PIPE)
