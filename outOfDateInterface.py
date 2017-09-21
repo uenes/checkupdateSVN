@@ -31,22 +31,41 @@ class OutOfDateInterface:
 				return True
 		return False
 
-	def update(self): # VERIFICAR o uso da opcao  --dry-run 
+	def update(self): 
 		process = Popen(['svn', 'merge', '--dry-run' ,'-r', 'BASE:HEAD', '.'], cwd=sys.argv[1], stdout=PIPE, stderr=PIPE) 
 		stdout, stderr = process.communicate()
-		print stdout
-		print stderr
 		
 		if stderr == '':
-			if not self.hasConflictInDryRun(stdout):
-				process = Popen(['svn', 'update', sys.argv[1]], stdout=PIPE, stderr=PIPE) #'--accept e',
-				stdout, stderr = process.communicate()
-				
-				if stderr == '':
-					self.__message.set('Update executado com sucesso! \n \n' + stdout)
-				else:
+			stdoutDryRun = stdout
+			listConflictPath = self.getListConflictPaths(stdoutDryRun)
+			process = Popen(['svn', 'update', '--accept', 'e', sys.argv[1]], stdout=PIPE, stderr=PIPE) 
+			stdout, stderr = process.communicate()
+			stdoutUpdate = stdout
+			
+			if stderr == '':
+				if self.getListConflictPaths(stdoutDryRun):
+					for path in listConflictPath:
+						process = Popen(['WinMergeU', path], cwd=sys.argv[1], stdout=PIPE, stderr=PIPE) 
+						stdout, stderr = process.communicate()
+					self.__message.set('Resolva os conflitos: \n \n' + self.getStringFromList(listConflictPath))
+				else:				
+					self.__message.set('Update executado com sucesso! \n \n' + stdoutUpdate)
 			else:
-				self.__message.set('Update com conflito! \n Por favor, execute o update com o TortoiseSVN para resolver os conflitos \n \n' + stdout)
+				self.__message.set('Houve um erro no update. \n \n' + stdoutUpdate)
 		else:
-			self.__message.set('Houve um erro no update. \n \n' + stderr)
+			self.__message.set('Houve um erro no update. \n \n' + stdoutUpdate)
 	
+	def getListConflictPaths(self, stdoutDryRun):
+		listOutput = stdoutDryRun.splitlines()
+		result = []
+		for line in listOutput:
+			if line[0] == 'C':
+				result.append(line[5:len(line)])
+				print line[5:len(line)]
+		return result
+	
+	def getStringFromList(list):
+		result = ''
+		for item in list:
+			result = result + item + '\n'
+		return result
