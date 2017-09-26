@@ -14,7 +14,8 @@ def getListOfServerChanges (lista):
 	for item in lista:
 		isServerChange = item.find('*')
 		if isServerChange != -1:
-			result.append(item)
+			beginIndexOfPath = item.find('C:\\')
+			result.append(item[beginIndexOfPath:len(item)])
 	return result
 
 def getStrOfPathServerChanges (listOfServerChanges):
@@ -27,7 +28,7 @@ def getStrOfPathServerChanges (listOfServerChanges):
 		result = result + path[previousLastOne:len(path)] + '\n'
 	return result
 
-def checkForPotentialConflict (lista): # VERIFICAR
+def checkForPotentialConflict (lista):
 	result = []
 	for item in lista:
 		isServerChange = item.find('*')
@@ -60,13 +61,8 @@ while True:
 	lista = statusCommand().splitlines()
 
 	listOfServerChanges = getListOfServerChanges(lista)
-	conflict = checkForPotentialConflict(lista)
-	stringOfPathServerChanges = getStrOfPathServerChanges(listOfServerChanges)	
-	if conflict:
-		stringOfPathServerChanges = stringOfPathServerChanges + '\n Atenção! Podem haver conflitos.'
-
+	
 	if len(listOfServerChanges) > 0:
-		openOutOfDateWindow(stringOfPathServerChanges)
-		
+		openOutOfDateWindow(listOfServerChanges)
 	time.sleep(timeOfDelay)
-
+	
