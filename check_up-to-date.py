@@ -5,8 +5,7 @@ import ctypes
 import time
 from subprocess import Popen, PIPE
 from outOfDateInterface import OutOfDateInterface
-
-# C:\\inetpub\\wwwroot\\Integracao_SIF_SEI_Sprint5
+from commands import Commands
 
 # **************** BEGIN FUNCTIONS ****************
 def getListOfServerChanges (lista):
@@ -40,29 +39,35 @@ def checkForPotentialConflict (lista):
 	
 def openOutOfDateWindow(pathServerChanges):
 	root = Tk()
-	app = OutOfDateInterface(root, pathServerChanges)
+	interface = OutOfDateInterface()
+	interface.openNewCommitsInterface(root, pathServerChanges)
 	root.iconbitmap('sync.ico')
 	root.mainloop()
 	root.destroy()
 
-def statusCommand ():
-	process = Popen(['svn', 'status', '-u', sys.argv[1]], stdout=PIPE, stderr=PIPE)
-	stdout, stderr = process.communicate()
-	return stdout
+def openErrorMessage(message):
+	root = Tk()
+	interface = OutOfDateInterface()
+	interface.errorMessage(root, message)
+	root.iconbitmap('sync.ico')
+	root.mainloop()
+	root.destroy()
 	
 # **************** END FUNCTIONS ****************
 
 
-timeOfDelay = 300
+timeOfDelay = 600
 reload(sys)  
 sys.setdefaultencoding('UTF8')
 
 while True:
-	lista = statusCommand().splitlines()
-
-	listOfServerChanges = getListOfServerChanges(lista)
+	commands = Commands()
+	try:
+		lista = commands.svnStatus().splitlines()
+		listOfServerChanges = getListOfServerChanges(lista)
+		if len(listOfServerChanges) > 0:
+			openOutOfDateWindow(listOfServerChanges)
+	except NameError, e:
+		openErrorMessage(e)
 	
-	if len(listOfServerChanges) > 0:
-		openOutOfDateWindow(listOfServerChanges)
 	time.sleep(timeOfDelay)
-	
