@@ -74,7 +74,7 @@ class OutOfDateInterface:
 		index = self.__listBoxChanged.curselection()
 		if len(index) == 1:
 			commands = Commands()
-			commands.textEditor(self.__pathServerChanges[0])
+			commands.textEditor(self.__pathServerChanges[index[0]])
 		
 	def errorMessage (self, message):
 		self.__master.title('Erro')
